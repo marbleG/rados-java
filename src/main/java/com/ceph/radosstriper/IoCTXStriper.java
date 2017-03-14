@@ -64,19 +64,35 @@ public class IoCTXStriper extends RadosBase {
      *
      * @param oid    The object to write to
      * @param buf    The content to write
+     * @param length The length to write
      * @param offset The offset when writing
      * @throws RadosException
      */
-    public void write(final String oid, final byte[] buf, final long offset) throws RadosException, IllegalArgumentException {
+    public void write(final String oid, final byte[] buf, final int length, final long offset) throws RadosException, IllegalArgumentException {
         if (offset < 0) {
             throw new IllegalArgumentException("Offset shouldn't be a negative value");
+        }
+        if (buf.length < length) {
+            throw new IllegalArgumentException("Length shouldn't be a smaller than Buffer length");
         }
         handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_striper_write(getPointer(), oid, buf, buf.length, offset);
+                return rados.rados_striper_write(getPointer(), oid, buf, length, offset);
             }
-        }, "Failed writing %s bytes with offset %s to %s", buf.length, offset, oid);
+        }, "Failed writing %s bytes with offset %s to %s", length, offset, oid);
+    }
+
+    /**
+     * Write to an object
+     *
+     * @param oid    The object to write to
+     * @param buf    The content to write
+     * @param offset The offset when writing
+     * @throws RadosException
+     */
+    public void write(final String oid, final byte[] buf, final long offset) throws RadosException, IllegalArgumentException {
+        this.write(oid, buf, buf.length, offset);
     }
 
     /**
