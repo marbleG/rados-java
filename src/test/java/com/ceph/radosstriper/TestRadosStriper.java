@@ -149,5 +149,26 @@ public class TestRadosStriper {
         }
     }
 
+    /**
+     * This test tests write of partial buffer
+     */
+    @Test
+    public void testIoCtxWritePartialBuffer() throws Exception {
+        /**
+         * The object we will write to with the data
+         */
+        String oid = "rados-java-partial";
+        int write_len = 5;
+        byte[] content = "junit wrote this".getBytes();
+
+        ioctx.write(oid, content, write_len, 0);
+
+        /**
+         * We now check for expected size
+         */
+        assertEquals("The size doesn't match length param", write_len, ioctx.stat(oid).getSize());
+
+        ioctx.remove(oid);
+    }
 
 }
