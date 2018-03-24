@@ -164,15 +164,15 @@ public class IoCTX extends RadosBase implements Closeable {
         handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_objects_list_open(getPointer(), list);
+                return rados.rados_nobjects_list_open(getPointer(), list);
             }
         }, "Failed starting to list all objects");
 
-        while (rados.rados_objects_list_next(list.getPointer(0), entry, null) == 0) {
+        while (rados.rados_nobjects_list_next(list.getPointer(0), entry, null, null) == 0) {
             objects.add(entry.getPointer(0).getString(0));
         }
 
-        rados.rados_objects_list_close(list.getPointer(0));
+        rados.rados_nobjects_list_close(list.getPointer(0));
 
         return objects.toArray(new String[objects.size()]);
     }
@@ -187,7 +187,7 @@ public class IoCTX extends RadosBase implements Closeable {
     public ListCtx listObjectsPartial(int limit) throws RadosException {
         Pointer list = new Memory(Pointer.SIZE);
 
-        int r = rados.rados_objects_list_open(this.getPointer(), list);
+        int r = rados.rados_nobjects_list_open(this.getPointer(), list);
         if (r < 0) {
             throw new RadosException("Failed listing all objects", r);
         }
