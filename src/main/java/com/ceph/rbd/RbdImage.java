@@ -26,6 +26,8 @@ import com.sun.jna.Native;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.LongByReference;
 import com.sun.jna.ptr.PointerByReference;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
@@ -33,7 +35,7 @@ import java.util.Arrays;
 import static com.ceph.rbd.Library.rbd;
 import com.sun.jna.NativeLong;
 
-public class RbdImage {
+public class RbdImage implements Closeable {
 
     private Pointer image;
     private String name;
@@ -368,4 +370,12 @@ public class RbdImage {
 			rbd.rbd_snap_set(this.getPointer(), new String());
 		}
 	}
+
+    @Override
+    public void close() throws RbdException {
+        int rc = rbd.rbd_close(image);
+        if (rc < 0) {
+            throw new RbdException("Failed to close image " + name, rc);
+        }
+    }
 }
