@@ -373,7 +373,7 @@ public class RbdImage implements Closeable {
 
     @Override
     public void close() throws RbdException {
-        int rc = rbd.rbd_close(image);
+        int rc = rbd.rbd_close(this.getPointer());
         if (rc < 0) {
             throw new RbdException("Failed to close image " + name, rc);
         }
