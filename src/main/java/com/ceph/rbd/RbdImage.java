@@ -127,6 +127,20 @@ public class RbdImage implements Closeable {
     }
 
     /**
+     * Rollback a RBD snapshot
+     *
+     * @param snapName
+     *         The name of the snapshot
+     * @throws RbdException
+     */
+    public void snapRollBack(String snapName) throws RbdException{
+        int r = rbd.rbd_snap_rollback(this.getPointer(), snapName);
+        if (r < 0) {
+            throw new RbdException("Failed to rollback snapshot " + snapName, r);
+        }
+    }
+
+    /**
      * Protect a snapshot
      *
      * @param snapName
