@@ -48,6 +48,7 @@ public interface Rbd extends Library {
             long stripe_unit, long stripe_count);
     int rbd_snap_create(Pointer image, String snapname);
     int rbd_snap_remove(Pointer image, String snapname);
+    int rbd_snap_rollback(Pointer image, String snapname);
     int rbd_snap_protect(Pointer image, String snapname);
     int rbd_snap_unprotect(Pointer image, String snapname);
     int rbd_snap_is_protected(Pointer image, String snap_name, IntByReference is_protected);
