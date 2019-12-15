@@ -34,6 +34,10 @@ public class RadosStriper extends Rados {
         super(id);
     }
 
+    public RadosStriper(String clustername, String name, long flags) {
+        super(clustername, name, flags);
+    }
+
     public IoCTXStriper ioCtxCreateStriper(final IoCTX ioCTX) throws RadosException {
         final Pointer p = new Memory(Pointer.SIZE);
         handleReturnCode(new Callable<Integer>() {
