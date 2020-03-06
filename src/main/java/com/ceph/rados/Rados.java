@@ -359,7 +359,7 @@ public class Rados extends RadosBase {
      * @throws RadosException
      */
     public IoCTX ioCtxCreate(final String pool) throws RadosException {
-        final Pointer p = new Memory(Pointer.SIZE);
+        final Pointer p = new Memory(Native.POINTER_SIZE);
         handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
