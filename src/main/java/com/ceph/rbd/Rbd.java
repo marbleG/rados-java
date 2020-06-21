@@ -237,7 +237,7 @@ public class Rbd {
      * @return RbdImage
      */
     public RbdImage open(String name, String snapName) throws RbdException {
-        Pointer p = new Memory(Pointer.SIZE);
+        Pointer p = new Memory(Native.POINTER_SIZE);
         int r = rbd.rbd_open(this.io, name, p, snapName);
         if (r < 0) {
             throw new RbdException("Failed to open image " + name, r);
@@ -268,7 +268,7 @@ public class Rbd {
      * @return RbdImage
      */
     public RbdImage openReadOnly(String name, String snapName) throws RbdException {
-        Pointer p = new Memory(Pointer.SIZE);
+        Pointer p = new Memory(Native.POINTER_SIZE);
         int r = rbd.rbd_open_read_only(this.io, name, p, snapName);
         if (r < 0) {
             throw new RbdException("Failed to open image " + name, r);

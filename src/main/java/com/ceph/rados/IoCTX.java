@@ -157,9 +157,9 @@ public class IoCTX extends RadosBase implements Closeable {
      * @throws RadosException
      */
     public String[] listObjects() throws RadosException {
-        Pointer entry = new Memory(Pointer.SIZE);
+        Pointer entry = new Memory(Native.POINTER_SIZE);
         List<String> objects = new ArrayList<String>();
-        final Pointer list = new Memory(Pointer.SIZE);
+        final Pointer list = new Memory(Native.POINTER_SIZE);
 
         handleReturnCode(new Callable<Integer>() {
             @Override
@@ -185,7 +185,7 @@ public class IoCTX extends RadosBase implements Closeable {
      * @throws RadosException
      */
     public ListCtx listObjectsPartial(int limit) throws RadosException {
-        Pointer list = new Memory(Pointer.SIZE);
+        Pointer list = new Memory(Native.POINTER_SIZE);
 
         int r = rados.rados_nobjects_list_open(this.getPointer(), list);
         if (r < 0) {
@@ -782,7 +782,7 @@ public class IoCTX extends RadosBase implements Closeable {
      */
     public Map<String, String> getExtendedAttributes(final String oid) throws RadosException {
         Map<String, String> attr_map = new HashMap<>();
-        final Pointer iterator = new Memory(Pointer.SIZE);
+        final Pointer iterator = new Memory(Native.POINTER_SIZE);
         final PointerByReference attr_name = new PointerByReference();
         final PointerByReference attr_value = new PointerByReference();
         final IntByReference attr_value_len = new IntByReference();

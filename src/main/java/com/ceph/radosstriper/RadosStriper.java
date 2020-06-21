@@ -23,6 +23,7 @@ import com.ceph.rados.Rados;
 import com.ceph.rados.exceptions.RadosException;
 import static com.ceph.radosstriper.Library.rados;
 import com.sun.jna.Memory;
+import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 import java.util.concurrent.Callable;
@@ -39,7 +40,7 @@ public class RadosStriper extends Rados {
     }
 
     public IoCTXStriper ioCtxCreateStriper(final IoCTX ioCTX) throws RadosException {
-        final Pointer p = new Memory(Pointer.SIZE);
+        final Pointer p = new Memory(Native.POINTER_SIZE);
         handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {

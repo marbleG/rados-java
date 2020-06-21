@@ -23,6 +23,7 @@ import java.util.Arrays;
 import com.ceph.rados.exceptions.RadosException;
 
 import com.sun.jna.Memory;
+import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 import static com.ceph.rados.Library.rados;
@@ -57,7 +58,7 @@ public class ListCtx {
         if (list == null) {
             return 0;
         }
-        Pointer entry = new Memory(Pointer.SIZE);
+        Pointer entry = new Memory(Native.POINTER_SIZE);
         int i = 0;
         while (i < limit && rados.rados_nobjects_list_next(list.getPointer(0), entry, null, null) == 0) {
             ids[i] = entry.getPointer(0).getString(0);
@@ -82,7 +83,7 @@ public class ListCtx {
         if (list == null) {
             return 0;
         }
-        Pointer entry = new Memory(Pointer.SIZE);
+        Pointer entry = new Memory(Native.POINTER_SIZE);
         long j = 0;
         while (j < skip && rados.rados_nobjects_list_next(list.getPointer(0), entry, null, null) == 0) {
             j++;
