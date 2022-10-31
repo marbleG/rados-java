@@ -137,7 +137,7 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
         return handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_set_object_layout_stripe_unit(getPointer(), stripeUnit);
+                return rados.rados_striper_set_object_layout_stripe_unit(getPointer(), stripeUnit);
             }
         }, "Failed to set stripe unit to: %s", stripeUnit);
     }
@@ -154,7 +154,7 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
         return handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_set_object_layout_stripe_count(getPointer(), stripeCount);
+                return rados.rados_striper_set_object_layout_stripe_count(getPointer(), stripeCount);
             }
         }, "Failed to set stripe count to: %s", stripeCount);
     }
@@ -171,7 +171,7 @@ public class IoCTXStriper extends RadosBase implements AutoCloseable {
         return handleReturnCode(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
-                return rados.rados_set_object_layout_object_size(getPointer(), stripeObjectSize);
+                return rados.rados_striper_set_object_layout_object_size(getPointer(), stripeObjectSize);
             }
         }, "Failed to set stripe object size to: %s", stripeObjectSize);
     }

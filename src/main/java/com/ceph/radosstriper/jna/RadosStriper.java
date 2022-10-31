@@ -31,11 +31,11 @@ public interface RadosStriper extends Library {
 
     void rados_striper_destroy(Pointer striper);
 
-    int rados_set_object_layout_stripe_unit(Pointer striper, int stripe_unit);
+    int rados_striper_set_object_layout_stripe_unit(Pointer striper, int stripe_unit);
 
-    int rados_set_object_layout_stripe_count(Pointer striper, int stripe_count);
+    int rados_striper_set_object_layout_stripe_count(Pointer striper, int stripe_count);
 
-    int rados_set_object_layout_object_size(Pointer striper, int object_size);
+    int rados_striper_set_object_layout_object_size(Pointer striper, int object_size);
 
     int rados_striper_write(Pointer striper, String oid, byte[] buf, int len, long off);
 
