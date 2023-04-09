@@ -1,5 +1,5 @@
 # RADOS Java
-These are Java bindings for [librados](http://www.ceph.com/docs/master/rados/api/librados/) (C) which use JNA.
+These are Java bindings for [librados](https://docs.ceph.com/en/latest/rados/api/librados/) (C) which use JNA.
 
 Both RADOS and RBD are implemented in these bindings.
 
