@@ -18,13 +18,13 @@
 
 package com.ceph.rbd;
 
-import com.ceph.rbd.jna.RbdImageInfo;
-import com.ceph.rbd.jna.RbdSnapInfo;
-import com.ceph.rados.Rados;
-import com.ceph.rados.exceptions.RadosException;
-import com.ceph.rados.IoCTX;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,22 +32,22 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.ceph.rados.IoCTX;
+import com.ceph.rados.Rados;
+import com.ceph.rados.exceptions.RadosException;
+import com.ceph.rbd.jna.RbdImageInfo;
+import com.ceph.rbd.jna.RbdSnapInfo;
+import com.sun.jna.Pointer;
 
-import java.security.SecureRandom;
-import java.math.BigInteger;
+import marble.RbdWrapper;
 
 public final class TestRbd {
     /**
-        This test reads it's configuration from the environment
-        Possible variables:
-        * RADOS_JAVA_ID
-        * RADOS_JAVA_CONFIG_FILE
-        * RADOS_JAVA_POOL
+     * This test reads it's configuration from the environment
+     * Possible variables:
+     * RADOS_JAVA_ID
+     * RADOS_JAVA_CONFIG_FILE
+     * RADOS_JAVA_POOL
      */
 
     private static String ENV_CONFIG_FILE = System.getenv("RADOS_JAVA_CONFIG_FILE");
@@ -76,7 +76,7 @@ public final class TestRbd {
         rados.confReadFile(new File(CONFIG_FILE));
         rados.connect();
         ioctx = rados.ioCtxCreate(POOL);
-        String [] allOids = ioctx.listObjects();
+        String[] allOids = ioctx.listObjects();
         for (int i = 0; i < allOids.length; i++) {
             ioctx.remove(allOids[i]);
         }
@@ -89,8 +89,8 @@ public final class TestRbd {
     }
 
     /**
-        This test verifies if we can get the version out of librados
-        It's currently hardcoded to expect at least 0.48.0
+     * This test verifies if we can get the version out of librados
+     * It's currently hardcoded to expect at least 0.48.0
      */
     @Test
     public void testGetVersion() {
@@ -98,6 +98,66 @@ public final class TestRbd {
         assertTrue(version[0] >= 0);
         assertTrue(version[1] >= 1);
         assertTrue(version[2] >= 8);
+    }
+
+    @Test
+    public void testGenOptions() {
+        try {
+            Pointer pointer = RbdWrapper.createOptions();
+            RbdWrapper.setOptions(pointer, "rbd");
+        } catch (Throwable e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+
+    }
+
+    @Test
+    public void testCreate4() throws Exception {
+        long imageSize = 10485760;
+        String imageName = "testecimage";
+        String datapool = "ecpool";
+
+        try {
+            RbdWrapper rbdWrapper = new RbdWrapper(ioctx);
+            rbdWrapper.create(imageName, imageSize, datapool);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+
+        }
+    }
+
+    @Test
+    public void getDataPool() throws Exception {
+
+        try {
+            testCreate4();
+            RbdWrapper rbdWrapper = new RbdWrapper(ioctx);
+            int dataPoolId = rbdWrapper.getDataPoolId("testecimage");
+            String poolName = rados.poolReverseLookup(dataPoolId);
+            System.out.println(poolName);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+
+        }
+    }
+
+    @Test
+    public void getRbdSize() throws Exception {
+
+        try {
+            testCreate4();
+            RbdWrapper rbd = new RbdWrapper(ioctx);
+            int r = rbd.getDataPoolId("testecimage");
+            String poolName = rados.poolReverseLookup(r);
+            System.out.println(poolName);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+
+        }
     }
 
     @Test
@@ -136,7 +196,7 @@ public final class TestRbd {
         } catch (RbdException e) {
             fail(e.getMessage() + ": " + e.getReturnValue());
         } finally {
-            cleanupImage(rados, ioctx, newImageName);
+            // cleanupImage(rados, ioctx, newImageName);
         }
     }
 
@@ -159,7 +219,7 @@ public final class TestRbd {
         } catch (RbdException e) {
             fail(e.getMessage() + ": " + e.getReturnValue());
         } finally {
-            cleanupImage(rados, ioctx, imageName);
+            // cleanupImage(rados, ioctx, imageName);
         }
     }
 
@@ -170,7 +230,7 @@ public final class TestRbd {
 
         try {
             // We only want layering and format 2
-            int features = (1<<0);
+            int features = (1 << 0);
 
             Rbd rbd = new Rbd(ioctx);
             rbd.create(imageName, imageSize, features, 0);
@@ -198,7 +258,7 @@ public final class TestRbd {
 
         try {
             // We only want layering and format 2
-            int features = (1<<0);
+            int features = (1 << 0);
 
             Rbd rbd = new Rbd(ioctx);
             rbd.create(imageName, imageSize, features, 0);
@@ -227,7 +287,7 @@ public final class TestRbd {
 
             rbd.close(image);
 
-            rbd.remove (imageName);
+            rbd.remove(imageName);
         } catch (RbdException e) {
             fail(e.getMessage() + ": " + e.getReturnValue());
         }
@@ -243,7 +303,7 @@ public final class TestRbd {
 
         try {
             // We only want layering and format 2
-            int features = (1<<0);
+            int features = (1 << 0);
 
             Rbd rbd = new Rbd(ioctx);
             rbd.create(imageName, imageSize, features, 0);
@@ -284,7 +344,7 @@ public final class TestRbd {
 
         try {
             // We only want layering and format 2
-            int features = (1<<0);
+            int features = (1 << 0);
 
             Rbd rbd = new Rbd(ioctx);
             rbd.create(imageName, imageSize, features, 0);
@@ -319,7 +379,7 @@ public final class TestRbd {
 
         try {
             // We only want layering and format 2
-            int features = (1<<0);
+            int features = (1 << 0);
 
             Rbd rbd = new Rbd(ioctx);
             rbd.create(imageName1, imageSize, features, 0);
@@ -356,7 +416,7 @@ public final class TestRbd {
 
         try {
             // We only want layering and format 2
-            int features = (1<<0);
+            int features = (1 << 0);
 
             Rbd rbd = new Rbd(ioctx);
             rbd.create(imageName, initialSize, features, 0);
@@ -374,187 +434,189 @@ public final class TestRbd {
         }
     }
 
-  @Test
-	public void testCloneAndFlatten() throws Exception {
-    String parentImageName = "parentimage";
-    String cloneImageName = "childimage";
-    String snapName = "snapshot";
-    long imageSize = 10485760;
+    @Test
+    public void testCloneAndFlatten() throws Exception {
+        String parentImageName = "parentimage";
+        String cloneImageName = "childimage";
+        String snapName = "snapshot";
+        long imageSize = 10485760;
 
-		try {
+        try {
 
-			Rbd rbd = new Rbd(ioctx);
+            Rbd rbd = new Rbd(ioctx);
 
-			// We only want layering and format 2
-			int features = (1 << 0);
+            // We only want layering and format 2
+            int features = (1 << 0);
 
-			// Create the parent image
-			rbd.create(parentImageName, imageSize, features, 0);
+            // Create the parent image
+            rbd.create(parentImageName, imageSize, features, 0);
 
-			// Open the parent image
-			RbdImage parentImage = rbd.open(parentImageName);
+            // Open the parent image
+            RbdImage parentImage = rbd.open(parentImageName);
 
-			// Verify that image is in format 2
-			boolean oldFormat = parentImage.isOldFormat();
-			assertTrue("The image wasn't the new (2) format", !oldFormat);
+            // Verify that image is in format 2
+            boolean oldFormat = parentImage.isOldFormat();
+            assertTrue("The image wasn't the new (2) format", !oldFormat);
 
-			// Create a snapshot on the parent image
-			parentImage.snapCreate(snapName);
+            // Create a snapshot on the parent image
+            parentImage.snapCreate(snapName);
 
-			// Verify that snapshot exists
-			List<RbdSnapInfo> snaps = parentImage.snapList();
-			assertEquals("There should only be one snapshot", 1, snaps.size());
+            // Verify that snapshot exists
+            List<RbdSnapInfo> snaps = parentImage.snapList();
+            assertEquals("There should only be one snapshot", 1, snaps.size());
 
-			// Protect the snapshot
-			parentImage.snapProtect(snapName);
+            // Protect the snapshot
+            parentImage.snapProtect(snapName);
 
-			// Verify that snapshot is protected
-			boolean isProtected = parentImage.snapIsProtected(snapName);
-			assertTrue("The snapshot was not protected", isProtected);
+            // Verify that snapshot is protected
+            boolean isProtected = parentImage.snapIsProtected(snapName);
+            assertTrue("The snapshot was not protected", isProtected);
 
-			// Clone the parent image using the snapshot
-			rbd.clone(parentImageName, snapName, ioctx, cloneImageName, features, 0);
+            // Clone the parent image using the snapshot
+            rbd.clone(parentImageName, snapName, ioctx, cloneImageName, features, 0);
 
-			// Open the cloned image
-			RbdImage cloneImage = rbd.open(cloneImageName);
+            // Open the cloned image
+            RbdImage cloneImage = rbd.open(cloneImageName);
 
-			// Flatten the cloned image
-			cloneImage.flatten();
+            // Flatten the cloned image
+            cloneImage.flatten();
 
-			// Unprotect the snapshot, this will succeed only after the clone is flattened
-			parentImage.snapUnprotect(snapName);
+            // Unprotect the snapshot, this will succeed only after the clone is flattened
+            parentImage.snapUnprotect(snapName);
 
-			// Verify that snapshot is not protected
-			isProtected = parentImage.snapIsProtected(snapName);
-			assertTrue("The snapshot was protected", !isProtected);
+            // Verify that snapshot is not protected
+            isProtected = parentImage.snapIsProtected(snapName);
+            assertTrue("The snapshot was protected", !isProtected);
 
-			// Delete the snapshot, this will succeed only after the clone is flattened and snapshot is unprotected
-			parentImage.snapRemove(snapName);
+            // Delete the snapshot, this will succeed only after the clone is flattened and
+            // snapshot is unprotected
+            parentImage.snapRemove(snapName);
 
-			// Close both the parent and cloned images
-			rbd.close(cloneImage);
-			rbd.close(parentImage);
-		} catch (RbdException e) {
-			fail(e.getMessage() + ": " + e.getReturnValue());
-		} finally {
-        cleanupImage(rados, ioctx, parentImageName);
-        cleanupImage(rados, ioctx, cloneImageName);
+            // Close both the parent and cloned images
+            rbd.close(cloneImage);
+            rbd.close(parentImage);
+        } catch (RbdException e) {
+            fail(e.getMessage() + ": " + e.getReturnValue());
+        } finally {
+            cleanupImage(rados, ioctx, parentImageName);
+            cleanupImage(rados, ioctx, cloneImageName);
+        }
     }
-	}
 
-  @Test
-	public void testListImages() throws Exception {
-    String testImage = "testimage";
-    long imageSize = 10485760;
-    int imageCount = 3;
+    @Test
+    public void testListImages() throws Exception {
+        String testImage = "testimage";
+        long imageSize = 10485760;
+        int imageCount = 3;
 
-		try {
-			Rbd rbd = new Rbd(ioctx);
+        try {
+            Rbd rbd = new Rbd(ioctx);
 
-			for (int i = 1; i <= imageCount; i++) {
-				rbd.create(testImage + i, imageSize);
-			}
+            for (int i = 1; i <= imageCount; i++) {
+                rbd.create(testImage + i, imageSize);
+            }
 
-			// List images without providing initial buffer size
-			List<String> imageList = Arrays.asList(rbd.list());
-			assertTrue("There were less than " + imageCount + " images in the pool", imageList.size() >= imageCount);
+            // List images without providing initial buffer size
+            List<String> imageList = Arrays.asList(rbd.list());
+            assertTrue("There were less than " + imageCount + " images in the pool", imageList.size() >= imageCount);
 
-			for (int i = 1; i <= imageCount; i++) {
-				assertTrue("Pool does not contain image testimage" + i, imageList.contains(testImage + i));
-			}
+            for (int i = 1; i <= imageCount; i++) {
+                assertTrue("Pool does not contain image testimage" + i, imageList.contains(testImage + i));
+            }
 
-			// List images and provide initial buffer size
-			imageList = null;
-			imageList = Arrays.asList(rbd.list(testImage.length()));
-			assertTrue("There were less than " + imageCount + " images in the pool", imageList.size() >= imageCount);
+            // List images and provide initial buffer size
+            imageList = null;
+            imageList = Arrays.asList(rbd.list(testImage.length()));
+            assertTrue("There were less than " + imageCount + " images in the pool", imageList.size() >= imageCount);
 
-			for (int i = 1; i <= imageCount; i++) {
-				assertTrue("Pool does not contain image testimage" + i, imageList.contains(testImage + i));
-			}
-		} catch (RbdException e) {
-			fail(e.getMessage() + ": " + e.getReturnValue());
-		} finally {
-      for (int i = 1; i <= imageCount; i++) {
-        cleanupImage(rados, ioctx, testImage + i);
-      }
+            for (int i = 1; i <= imageCount; i++) {
+                assertTrue("Pool does not contain image testimage" + i, imageList.contains(testImage + i));
+            }
+        } catch (RbdException e) {
+            fail(e.getMessage() + ": " + e.getReturnValue());
+        } finally {
+            for (int i = 1; i <= imageCount; i++) {
+                cleanupImage(rados, ioctx, testImage + i);
+            }
+        }
     }
-	}
 
-  @Test
-	public void testListChildren() throws Exception {
-		try {
-			Rbd rbd = new Rbd(ioctx);
+    @Test
+    public void testListChildren() throws Exception {
+        try {
+            Rbd rbd = new Rbd(ioctx);
 
-			String parentImageName = "parentimage";
-			String childImageName = "childImage";
-			String snapName = "snapshot";
-			long imageSize = 10485760;
-			int childCount = 3;
+            String parentImageName = "parentimage";
+            String childImageName = "childImage";
+            String snapName = "snapshot";
+            long imageSize = 10485760;
+            int childCount = 3;
 
-			// We only want layering and format 2
-			int features = (1 << 0);
+            // We only want layering and format 2
+            int features = (1 << 0);
 
-			// Create the parent image
-			rbd.create(parentImageName, imageSize, features, 0);
+            // Create the parent image
+            rbd.create(parentImageName, imageSize, features, 0);
 
-			// Open the parent image
-			RbdImage parentImage = rbd.open(parentImageName);
+            // Open the parent image
+            RbdImage parentImage = rbd.open(parentImageName);
 
-			// Verify that image is in format 2
-			boolean oldFormat = parentImage.isOldFormat();
-			assertTrue("The image wasn't the new (2) format", !oldFormat);
+            // Verify that image is in format 2
+            boolean oldFormat = parentImage.isOldFormat();
+            assertTrue("The image wasn't the new (2) format", !oldFormat);
 
-			// Create a snapshot on the parent image
-			parentImage.snapCreate(snapName);
+            // Create a snapshot on the parent image
+            parentImage.snapCreate(snapName);
 
-			// Verify that snapshot exists
-			List<RbdSnapInfo> snaps = parentImage.snapList();
-			assertEquals("There should only be one snapshot", 1, snaps.size());
+            // Verify that snapshot exists
+            List<RbdSnapInfo> snaps = parentImage.snapList();
+            assertEquals("There should only be one snapshot", 1, snaps.size());
 
-			// Protect the snapshot
-			parentImage.snapProtect(snapName);
+            // Protect the snapshot
+            parentImage.snapProtect(snapName);
 
-			// Verify that snapshot is protected
-			boolean isProtected = parentImage.snapIsProtected(snapName);
-			assertTrue("The snapshot was not protected", isProtected);
+            // Verify that snapshot is protected
+            boolean isProtected = parentImage.snapIsProtected(snapName);
+            assertTrue("The snapshot was not protected", isProtected);
 
-			for (int i = 1; i <= childCount; i++) {
-				// Clone the parent image using the snapshot
-				rbd.clone(parentImageName, snapName, ioctx, childImageName + i, features, 0);
-			}
+            for (int i = 1; i <= childCount; i++) {
+                // Clone the parent image using the snapshot
+                rbd.clone(parentImageName, snapName, ioctx, childImageName + i, features, 0);
+            }
 
-			// List the children of snapshot
-			List<String> children = parentImage.listChildren(snapName);
+            // List the children of snapshot
+            List<String> children = parentImage.listChildren(snapName);
 
-			// Verify that two children are returned and the list contains their names
-			assertEquals("Snapshot should have " + childCount + " children", childCount, children.size());
+            // Verify that two children are returned and the list contains their names
+            assertEquals("Snapshot should have " + childCount + " children", childCount, children.size());
 
-			for (int i = 1; i <= childCount; i++) {
-				assertTrue(POOL + '/' + childImageName + i + " should be listed as a child", children.contains(POOL + '/' + childImageName + i));
-			}
+            for (int i = 1; i <= childCount; i++) {
+                assertTrue(POOL + '/' + childImageName + i + " should be listed as a child",
+                        children.contains(POOL + '/' + childImageName + i));
+            }
 
-			// Delete the cloned images
-			for (int i = 1; i <= childCount; i++) {
-				rbd.remove(childImageName + i);
-			}
+            // Delete the cloned images
+            for (int i = 1; i <= childCount; i++) {
+                rbd.remove(childImageName + i);
+            }
 
-			// Unprotect the snapshot, this will succeed only after the clone is flattened
-			parentImage.snapUnprotect(snapName);
+            // Unprotect the snapshot, this will succeed only after the clone is flattened
+            parentImage.snapUnprotect(snapName);
 
-			// Verify that snapshot is not protected
-			isProtected = parentImage.snapIsProtected(snapName);
-			assertTrue("The snapshot was protected", !isProtected);
+            // Verify that snapshot is not protected
+            isProtected = parentImage.snapIsProtected(snapName);
+            assertTrue("The snapshot was protected", !isProtected);
 
-			// Delete the snapshot
-			parentImage.snapRemove(snapName);
+            // Delete the snapshot
+            parentImage.snapRemove(snapName);
 
-			// Close the parent imgag
-			rbd.close(parentImage);
+            // Close the parent imgag
+            rbd.close(parentImage);
 
-			// Delete the parent image
-			rbd.remove(parentImageName);
-		} catch (RbdException e) {
-			fail(e.getMessage() + ": " + e.getReturnValue());
-		}
-	}
+            // Delete the parent image
+            rbd.remove(parentImageName);
+        } catch (RbdException e) {
+            fail(e.getMessage() + ": " + e.getReturnValue());
+        }
+    }
 }
